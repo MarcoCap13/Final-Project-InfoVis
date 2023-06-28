@@ -154,6 +154,25 @@ function updateData(filtro) {
 	}).then(function (data) {
 		const DataCalendar = document.getElementById("calendar")?.value;
 		const citta = document.getElementById("citta").value;
+		// Codice per vedere l'ultimo elemento del csv
+		const filteredData = data.filter((row) => row.Stazione === citta);
+		const lastRow = filteredData[filteredData.length - 1];
+
+
+		if (lastRow) {
+			const stazione = lastRow.Stazione;
+			const dataRilevazione = lastRow.DataRilevazione;
+			const indiceValidita = lastRow.IndiceValidita;
+		} 
+
+		// Codice per vedere il primo elemento del csv per ogni Stazione
+		const firstRow = filteredData[0];
+
+		if (firstRow) {
+			const stazione = firstRow.Stazione;
+			const dataRilevazione = firstRow.DataRilevazione;
+			const indiceValidita = firstRow.IndiceValidita;
+		} 
 
 		const filtered = filter(data, filtro, DataCalendar, citta);
 
@@ -294,6 +313,55 @@ function updateData(filtro) {
 		const displayParam = urlParams.get('display');
 
 		if (!displayParam) {
+			if (citta !== "") {
+				// Aggiungi la linea orizzontale
+				g.append("line")
+					.attr("class", "linea-orizzontale")
+					.attr("x1", x(filtered[0].DataRilevazione)) // Posizione di inizio della linea (estremo sinistro)
+					.attr("y1", height + margin.top) // Altezza della linea (estremo inferiore)
+					.attr("x2", x(filtered[filtered.length - 1].DataRilevazione) + x.bandwidth()) // Posizione di fine della linea (estremo destro)
+					.attr("y2", height + margin.top) // Altezza della linea (estremo inferiore)
+					.attr("stroke", "black") // Colore della linea
+					.attr("stroke-width", 1); // Spessore della linea
+
+				// Aggiungi le lineette verticali agli estremi sinistro e destro della linea orizzontale
+				g.append("line")
+					.attr("class", "linea-verticale")
+					.attr("x1", x(filtered[0].DataRilevazione)) // Posizione di inizio della linea (estremo superiore)
+					.attr("y1", height + margin.top - 5) // Altezza della linea (estremo superiore)
+					.attr("x2", x(filtered[0].DataRilevazione)) // Posizione di fine della linea (estremo inferiore)
+					.attr("y2", height + margin.top + 5) // Altezza della linea (estremo inferiore)
+					.attr("stroke", "black") // Colore della linea
+					.attr("stroke-width", 1); // Spessore della linea
+
+				g.append("line")
+					.attr("class", "linea-verticale")
+					.attr("x1", x(filtered[filtered.length - 1].DataRilevazione) + x.bandwidth()) // Posizione di inizio della linea (estremo superiore)
+					.attr("y1", height + margin.top - 5) // Altezza della linea (estremo superiore)
+					.attr("x2", x(filtered[filtered.length - 1].DataRilevazione) + x.bandwidth()) // Posizione di fine della linea (estremo inferiore)
+					.attr("y2", height + margin.top + 5) // Altezza della linea (estremo inferiore)
+					.attr("stroke", "black") // Colore della linea
+					.attr("stroke-width", 1); // Spessore della linea
+
+				// Aggiungi il valore di Data di rilevazione all'estremo sinistro della linea
+				g.append("text")
+					.attr("class", "testo-data")
+					.attr("x", x(filtered[0].DataRilevazione))
+					.attr("y", height + margin.top + 20)
+					.text(`Data di rilevazione iniziale: ${filtered[0].DataRilevazione}`)
+					.attr("text-anchor", "start")
+					.attr("font-size", "12px");
+
+				// Aggiungi il valore di Data di rilevazione all'estremo destro della linea
+				g.append("text")
+					.attr("class", "testo-data")
+					.attr("x", x(filtered[filtered.length - 1].DataRilevazione) + x.bandwidth())
+					.attr("y", height + margin.top + 20)
+					.text(`Data di rilevazione finale: ${filtered[filtered.length - 1].DataRilevazione}`)
+					.attr("text-anchor", "end")
+					.attr("font-size", "12px");
+
+			}
 			g.selectAll(".bar")
 				.data(filtered)
 				.enter()
@@ -362,6 +430,55 @@ function updateData(filtro) {
 					}
 				});
 		} else {
+			if (citta !== "") {
+				// Aggiungi la linea orizzontale
+				g.append("line")
+					.attr("class", "linea-orizzontale")
+					.attr("x1", x(filtered[0].DataRilevazione)) // Posizione di inizio della linea (estremo sinistro)
+					.attr("y1", height + margin.top) // Altezza della linea (estremo inferiore)
+					.attr("x2", x(filtered[filtered.length - 1].DataRilevazione) + x.bandwidth()) // Posizione di fine della linea (estremo destro)
+					.attr("y2", height + margin.top) // Altezza della linea (estremo inferiore)
+					.attr("stroke", "black") // Colore della linea
+					.attr("stroke-width", 1); // Spessore della linea
+
+				// Aggiungi le lineette verticali agli estremi sinistro e destro della linea orizzontale
+				g.append("line")
+					.attr("class", "linea-verticale")
+					.attr("x1", x(filtered[0].DataRilevazione)) // Posizione di inizio della linea (estremo superiore)
+					.attr("y1", height + margin.top - 5) // Altezza della linea (estremo superiore)
+					.attr("x2", x(filtered[0].DataRilevazione)) // Posizione di fine della linea (estremo inferiore)
+					.attr("y2", height + margin.top + 5) // Altezza della linea (estremo inferiore)
+					.attr("stroke", "black") // Colore della linea
+					.attr("stroke-width", 1); // Spessore della linea
+
+				g.append("line")
+					.attr("class", "linea-verticale")
+					.attr("x1", x(filtered[filtered.length - 1].DataRilevazione) + x.bandwidth()) // Posizione di inizio della linea (estremo superiore)
+					.attr("y1", height + margin.top - 5) // Altezza della linea (estremo superiore)
+					.attr("x2", x(filtered[filtered.length - 1].DataRilevazione) + x.bandwidth()) // Posizione di fine della linea (estremo inferiore)
+					.attr("y2", height + margin.top + 5) // Altezza della linea (estremo inferiore)
+					.attr("stroke", "black") // Colore della linea
+					.attr("stroke-width", 1); // Spessore della linea
+
+				// Aggiungi il valore di Data di rilevazione all'estremo sinistro della linea
+				g.append("text")
+					.attr("class", "testo-data")
+					.attr("x", x(filtered[0].DataRilevazione))
+					.attr("y", height + margin.top + 20)
+					.text(`Data di rilevazione iniziale: ${filtered[0].DataRilevazione}`)
+					.attr("text-anchor", "start")
+					.attr("font-size", "12px");
+
+				// Aggiungi il valore di Data di rilevazione all'estremo destro della linea
+				g.append("text")
+					.attr("class", "testo-data")
+					.attr("x", x(filtered[filtered.length - 1].DataRilevazione) + x.bandwidth())
+					.attr("y", height + margin.top + 20)
+					.text(`Data di rilevazione finale: ${filtered[filtered.length - 1].DataRilevazione}`)
+					.attr("text-anchor", "end")
+					.attr("font-size", "12px");
+
+			}
 			g.selectAll(".line")
 				.data([filtered])
 				.enter()
