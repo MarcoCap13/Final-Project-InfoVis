@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<!--//=====================================================================+
+// File name 	: EsploraPerData.html
+// Begin	: 9/06/2023
+// Last Update	: 
+// Description  : InfoVis - Secondo Progetto
+// Author	: Marco Caponi & Gianluca Ceneda
+// Versione     : 1.0
+//
+//=====================================================================+-->
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>InfoVis - Secondo Progetto</title>
+  <script type="text/javascript" src="d3/d3.min.js" charset="utf-8"></script>
+  <script type="text/javascript" src="Supporto/function.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/stile.css">
+  <!-- Sorgenti del calendario -->
+  <link href="css/CalendarControl.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="Supporto/CalendarControl.js"></script>
+
+  <style>
+    .button {
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    #TMax {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+    }
+
+    #TMin {
+      background-color: #008CBA;
+      border: none;
+      color: white;
+    }
+
+    #TMid {
+      background-color: #f44336;
+      border: none;
+      color: white;
+    }
+
+    #UMid {
+      background-color: #FF9800;
+      border: none;
+      color: white;
+    }
+
+    #Prec {
+      background-color: #9C27B0;
+      border: none;
+      color: white;
+    }
+
+    .input-field {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    select.input-field {
+      width: 120px;
+    }
+
+    input[type="checkbox"] {
+      margin-left: 10px;
+    }
+
+    #media-container {
+      display: none;
+      margin-left: 50%;
+      font-weight: bold;
+      border: 2px solid rgb(185 179 179);
+      width: 150px;
+      text-align: center;
+    }
+
+    .info {
+      display: none;
+      margin-left: 50%;
+      width: 155px;
+      text-align: center;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 16px;
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body onload="init()">
+  <div class="container">
+    <div class="divTitolo">
+      <h1 align="center">
+        <font color="white">&#9672 Serie Storica Meteo Regione Lazio V1 &#9672</font>
+        <p style="font-size:20px; color: white;">Filtro per data</p>
+      </h1>
+    </div>
+    <div class="content">
+      <table width="1500">
+        <tr>
+          <td width="140">Seleziona un dataset</td>
+          <td>
+            <div style="float:left;">
+              <select class="input-field" id="anno" onchange="settaNomeFile();">
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+                <option value="2020">2020</option>
+                <option value="2019">2019</option>
+                <option value="2018">2018</option>
+              </select>
+            </div>
+          </td>
+          <td>
+            Filtro sulla data:
+            <input class="input-field" type="text" onfocus="showCalendarControl(this);" name="data" SIZE="10"
+              maxlength="10" id="calendar" />
+            <img onclick="javascript:changeDate('prev')" src="img/prev.jpg" height="21" width="21" />
+            <img onclick="javascript:changeDate('next')" src="img/next.jpg" height="21" width="21" />
+            <select class="input-field" id="citta" style="visibility: hidden; width: 0%;"
+              onchange="document.getElementById('calendar').value = ''; document.getElementById('myCheckbox').disabled=true; ">
+              <option value=""></option>
+            </select>
+            <input class="input-field" type="checkbox" id="myCheckbox"> Ordinamento crescente
+            &ensp; &ensp;&ensp;&ensp;&ensp; &ensp; Fonte dati:
+            <a href="http://dati.lazio.it/catalog/it/dataset/serie-storica-agrometeo" target="_blank">Regione Lazio</a>
+          </td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <td>
+            </br>
+            <button class="button" id="TMax" value="TemperaturaMax" onclick="updateData('TEMPARIA2M_MAXG')">Temperatura
+              Max</button>
+            <button class="button" id="TMin" onclick="updateData('TEMPARIA2M_MING')">Temperatura Min</button>
+            <button class="button" id="TMid" onclick="updateData('TEMPARIA2M_MEDG')">Temperatura Media</button>
+            <button class="button" id="UMid" onclick="updateData('UMARIA2M_MEDG')">Umidità Media</button>
+            <button class="button" id="Prec" onclick="updateData('PREC_TOTG')">Precipitazioni TOT</button>
+            <button class="button" id="toggleDisplayButton" onclick="toggleDisplay()">Cambia grafico</button>
+            <button class="button" onclick="showRangePage()">Precipitazioni per range</button>
+            <div id="file-content" style="display: none;"></div>
+          </td>
+        </tr>
+        <tr>
+          <td></br><svg id="grafico" width="1400" height="500"></svg></td>
+        </tr>
+      </table>
+    </div>
+    </br>
+    <div id="media-container" style="display: none;"></div>
+    <button class="info" id="testButton" style="display: none;" onclick="showMediaContainer()">
+      <img src="img/info.png" alt="Info" class="info-icon" width="50px" height="50px">
+    </button>
+    <div class="logo-container">
+      <a href="/"><img src="img/logo.png" width="200" height="80" alt="Logo" class="logo"></a>
+    </div>
+  </div>
+  <script>
+    function toggleDisplay() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const displayParam = urlParams.get('display');
+
+      if (displayParam === 'false') {
+        urlParams.delete('display');
+      } else {
+        urlParams.set('display', 'false');
+      }
+
+      let newUrl = window.location.origin + window.location.pathname;
+      if (urlParams.toString()) {
+        newUrl += '?' + urlParams.toString();
+      }
+      window.location.href = newUrl;
+    }
+
+    function showMediaContainer() {
+      var div = document.getElementById("media-container");
+      var queryParams = new URLSearchParams(window.location.search);
+      var infoParam = queryParams.get("info");
+      if (infoParam === null || infoParam === "true") {
+        // Imposta il parametro di query "info" a "false"
+        queryParams.set("info", "false");
+        div.style.display = "none";
+      } if (infoParam === "false") {
+        // Imposta il parametro di query "info" a "true"
+        queryParams.set("info", "true");
+        div.style.display = "block";
+      }
+
+      // Aggiorna l'URL con i nuovi parametri di query
+      var newUrl = window.location.pathname + "?" + queryParams.toString();
+      window.history.replaceState({}, "", newUrl);
+    }
+
+  </script>
+
+<script>
+  var button = document.getElementById("toggle-button");
+  var fileContent = document.getElementById("file-content");
+  var isContentVisible = false;
+
+  function showRangePage() {
+  window.open("range.html", "_blank");
+}
+
+    // Toggle the visibility flag
+    isContentVisible = !isContentVisible;
+  
+</script>
+</body>
+
+</html>

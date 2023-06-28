@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Grafico a Barre - D3.js</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+
+        .divTitolo {
+            overflow: hidden;
+            background-color: #D2D2D2;
+            width: 100%;
+        }
+
+        .divTitolo a {
+            float: left;
+            font-size: 16px;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .logo-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .logo {
+            max-width: 200px;
+            width: 100%;
+            height: auto;
+        }
+
+        svg {
+            margin-left: 60px;
+            margin-top: 30px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="divTitolo">
+        <h1 align="center">
+            <font color="green">&#9672 Serie Storica Meteo Regione Lazio V1 FILTRO PER DATA &#9672</font>
+            <p style="font-size:20px">Studenti: Marco Caponi, Gianluca Ceneda</p>
+        </h1>
+    </div>
+    <div id="chart"></div>
+    <div class="logo-container">
+        <a href="/"><img src="img/logo.png" width="200" height="80" alt="Logo" class="logo"></a>
+    </div>
+    <h2>Seleziona un range in cui visualizzare le precipitazioni </h2>
+    <label for="start-date">Start Date:</label>
+    <input type="date" id="start-date" onchange="logSelectedYear()">
+
+    <label for="end-date">End Date:</label>
+    <input type="date" id="end-date">
+
+    <label for="station">Stazione:</label>
+    <input type="text" id="station" value="ACCUMOLI">
+
+    <button class="button" id="update-button" onclick="carica(); setSVGHeight(550)">Update Chart</button>
+
+
+    <p id="chart-info"></p>
+
+
+
+    <script>
+        var isChartInitialized = false;
+
+        var selectedYear = "";  // Dichiarazione della variabile globale
+        var selectedYear2 = "";
+        function logSelectedYear() {
+            var startDateInput = document.getElementById("start-date");
+            var endDateInput = document.getElementById("end-date");
+            var selectedDate = new Date(startDateInput.value);
+            var selectedDate2 = new Date(endDateInput.value);
+            selectedYear = selectedDate.getFullYear();
+            selectedYear2 = selectedDate2.getFullYear()
+
+            if (selectedYear === 2023) {
+                selectedYear = selectedDate.getFullYear() - 1
+            }
+            if (selectedYear2 === 2023) {
+                selectedYear2 = selectedDate.getFullYear() - 1
+            }
+        }
+
+        var startDateInput = document.getElementById("start-date");
+        startDateInput.addEventListener("change", logSelectedYear);
+        var startDateInput = document.getElementById("start-date");
+        startDateInput.addEventListener("change", logSelectedYear);
+
+        var startDateInput = document.getElementById("end-date");
+        startDateInput.addEventListener("change", logSelectedYear);
+        var startDateInput = document.getElementById("end-date");
+        startDateInput.addEventListener("change", logSelectedYear);
+        // Imposta le dimensioni del grafico
+        var width = 400;
+        var height = 300;
+        var margin = { top: 20, right: 20, bottom: 30, left: 40 };
+
+        // Crea il contenitore SVG
+        var svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+        // Carica i dati dal file CSV
+        function carica() {
+            console.log("x" + margin.left);
+            console.log("y" + margin.top);
+            d3.dsv(";", "dati/dataset" + selectedYear + ".csv", function (d) {
+                return {
+                    Stazione: d.Stazione,
+                    Grandezza: d.Grandezza,
+                    DataRilevazione: d.DataRilevazione.substring(0, 10),
+                    Valore: +d.Valore,
+                    IndiceValidita: d.IndiceValidita,
+                };
+            }).then(function (data) {
+                var filteredData = []; // Inizializza un array vuoto per salvare i dati filtrati
+
+                function updateChart() {
+                    // Get the start and end dates from the user input
+                    var startDate = d3.timeParse("%Y-%m-%d")(document.getElementById("start-date").value);
+                    var endDate = d3.timeParse("%Y-%m-%d")(document.getElementById("end-date").value);
+
+                    if (startDate.getFullYear() === 2023) {
+                        startDate = 2022;
+                    }
+                    if (endDate.getFullYear() === 2023) {
+                        endDate = 2022;
+                    }
+                    // Acquisisci il valore "station" dall'input dell'utente e metti la prima lettera maiuscola
+                    var station = document.getElementById("station").value.toUpperCase();
+
+                    // Filtra il dato attraverso la data scelta
+                    filteredData = data.filter(function (d) {
+                        var date = d3.timeParse("%d/%m/%Y")(d.DataRilevazione.substring(0, 10));
+                        return (
+                            d.Grandezza === "PREC_TOTG" &&
+                            d.Stazione === station &&
+                            date >= startDate &&
+                            date <= endDate
+                        );
+                    });
+
+                    // Organizza il filteredData attraverso DataRilevazione in ordine decrescente
+                    filteredData.sort(function (a, b) {
+                        var dateA = d3.timeParse("%d/%m/%Y")(a.DataRilevazione.substring(0, 10));
+                        var dateB = d3.timeParse("%d/%m/%Y")(b.DataRilevazione.substring(0, 10));
+                        return d3.ascending(dateA, dateB);
+                    });
+
+                    // Rimuovi gli assi x e y prima di aggiornarli
+                    svg.select(".x-axis").remove();
+                    svg.select(".y-axis").remove();
+
+                    // Rimuovi i precedenti grafici prima di aggiornarli
+                    svg.selectAll(".bar").remove();
+                    svg.select(".no-precipitation").remove();
+
+                    if (filteredData.length === 0 || filteredData.every(d => d.Valore === 0.0)) {
+                        // Handle case when no filtered data is available or all values are zero
+                        svg.append("text")
+                            .attr("class", "no-precipitation")
+                            .attr("x", width / 2)
+                            .attr("y", height / 2)
+                            .attr("text-anchor", "middle")
+                            .text("Nessuna precipitazione");
+                        return;
+                    }
+
+                    // Troviamo il valore massimo
+                    var maxAbsValue = d3.max(filteredData, function (d) { return Math.abs(d.Valore); });
+
+                    // scaliamo sull'asse x e y
+                    var uniqueDates = [...new Set(filteredData.map(d => d.DataRilevazione))];
+                    var xScale = d3
+                        .scaleBand()
+                        .domain(uniqueDates)
+                        .range([0, width])
+                        .paddingInner(0.1);
+
+                    var yScale = d3
+                        .scaleLinear()
+                        .domain([0, maxAbsValue])
+                        .range([height, 0]);
+
+                    // creiamo l'asse x e y
+                    var xAxis = d3.axisBottom(xScale);
+                    var yAxis = d3.axisLeft(yScale);
+
+                    // e aggiungiamoli al grafico
+                    svg.append("g")
+                        .attr("class", "x-axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis)
+                        .selectAll("text")
+                        .style("text-anchor", "end")
+                        .style("text-size", "10px")
+                        .attr("dx", "-.8em")
+                        .attr("dy", ".15em")
+                        .attr("transform", "rotate(-65)");
+
+                    // aggiungi l'asse y
+                    svg.append("g")
+                        .attr("class", "y-axis")
+                        .call(yAxis);
+
+                    svg
+                        .append("line")
+                        .attr("class", "zero-line")
+                        .attr("x1", 0)
+                        .attr("y1", yScale(0))
+                        .attr("x2", width)
+                        .attr("y2", yScale(0))
+                        .style("stroke", "black")
+                        .style("stroke-width", "1px")
+                        .style("stroke-dasharray", "4");
+                    
+                    svg
+                        .selectAll(".bar")
+                        .data(filteredData)
+                        .enter()
+                        .append("rect")
+                        .attr("class", "bar")
+                        .attr("x", function (d) { return xScale(d.DataRilevazione) + xScale.bandwidth() * 0.1; })
+                        .attr("width", xScale.bandwidth() * 0.8)
+                        .attr("y", function (d) { return yScale(d.Valore); })
+                        .attr("height", function (d) { return height - yScale(d.Valore); });
+
+                    svg.append("text")
+                        .attr("class", "unit-label")
+                        .attr("x", -margin.left + 14)
+                        .attr("y", -margin.top )
+                        .text("mm")
+                        .attr("alignment-baseline", "hanging")
+                        .style("font-weight", "bold");
+
+
+                    // aggiorna la descrizione 
+                    var chartInfo = "Andamento precipitazioni da " + startDate.toDateString() + " fino a " + endDate.toDateString() + " per la stazione di " + station;
+                    d3.select("#chart-info").text(chartInfo);
+                }
+
+                // aggiorna il grafico quando clicchiamo col mouse
+                d3.select("#update-button").on("click", updateChart);
+
+                // rilevare il campo dell'input
+                var startDateInput = document.getElementById("start-date");
+                var endDateInput = document.getElementById("end-date");
+                var stationInput = document.getElementById("station");
+                var updateButton = document.getElementById("update-button");
+
+                // funzione per rivedere se i campi sono tutti inseriti
+                function checkFields() {
+                    var startDate = startDateInput.value;
+                    var endDate = endDateInput.value;
+                    var station = stationInput.value;
+
+                    if (startDate !== "" && endDate !== "" && station !== "") {
+                        updateButton.disabled = false;
+                    } else {
+                        updateButton.disabled = true;
+                    }
+                }
+
+                startDateInput.addEventListener("input", checkFields);
+                endDateInput.addEventListener("input", checkFields);
+                stationInput.addEventListener("input", checkFields);
+            });
+        };
+        function setSVGHeight(height) {
+            d3.select("svg")
+                .attr("height", height);
+        }
+    </script>
+</body>
+
+</html>

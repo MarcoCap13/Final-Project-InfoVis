@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Benvenuto!</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+      padding-top: 100px;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 36px;
+      color: #333;
+      margin-top: 0; /* Add this line to remove the default margin */
+    }
+
+    p {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .column {
+      height: 100vh;
+      width: 33.33%;
+      float: left;
+    }
+
+    .center-column {
+      background-color: #f4f4f4;
+    }
+
+    .right-column {
+      background-color: white;
+    }
+
+    .clearfix::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    #displayText {
+      color: red;
+      margin-top: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 style="color: Green; font-size: xxx-large; ">Secondo Progetto infoVis
+    <p>Studenti: Marco Caponi, Gianluca Ceneda</p>
+  </h1>
+
+  <div class="column left-column">
+    <iframe src="primi progetti InfoVis/primo progetto Marco/index.html" width="100%" height="100%"></iframe>
+  </div>
+
+  <div class="column center-column">
+    <h1>Benvenuto, <span id="username"></span>!</h1>
+    <p>Sei pronto per un'esperienza straordinaria?</p>
+    <p>Scegli il percorso che preferisci:</p>
+    <button onclick="redirectToCityFilter()">Esplora per città</button>
+    <button onclick="redirectToDateFilter()">Esplora per data</button>
+    <h1 id="displayText"></h1>
+  </div>
+
+  <div class="column right-column">
+    <iframe src="primi progetti InfoVis/VISGianluca/index.html" width="100%" height="100%"></iframe>
+  </div>
+
+  <script>
+    var typedString = "";
+    var displayText = document.getElementById("displayText");
+
+    document.addEventListener("keydown", function (event) {
+      typedString += event.key;
+
+      if (typedString === "prof") {
+        displayText.innerText = "PROF DACCI QUESTO 30 È L'ULTIMO ESAME";
+        displayText.style.fontWeight = "bold";
+        typedString = "";
+      }
+
+      if (typedString === "back") {
+        displayText.innerText = "";
+        displayText.style.fontWeight = "normal";
+        typedString = "";
+      }
+    });
+
+    function getUsername() {
+      var storedUsername = sessionStorage.getItem("username");
+      var username = storedUsername || prompt("Inserisci il tuo nome:");
+      document.getElementById("username").textContent = username;
+      sessionStorage.setItem("username", username);
+    }
+
+    function redirectToCityFilter() {
+      window.location.href = "EsploraPerCitta.html";
+    }
+
+    function redirectToDateFilter() {
+      window.location.href = "EsploraPerData.html";
+    }
+
+    window.onload = getUsername;
+  </script>
+</body>
+
+</html>

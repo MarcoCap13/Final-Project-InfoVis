@@ -1,0 +1,84 @@
+#CalendarControlIFrame {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 250px;
+  width: 250px;
+  z-index: 99;
+}
+
+#CalendarControl {
+  position: absolute;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  display: none;
+  z-index: 100;
+}
+
+#CalendarControl table {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#CalendarControl th {
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  color: #333;
+  background-color: #f9f9f9;
+}
+
+#CalendarControl th a {
+  color: #333;
+  text-decoration: none;
+}
+
+#CalendarControl td {
+  text-align: center;
+  padding: 10px;
+}
+
+#CalendarControl .header {
+  background-color: #3366cc;
+  color: #fff;
+}
+
+#CalendarControl .weekday {
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+#CalendarControl .weekend {
+  background-color: #fff1c6;
+  color: #333;
+}
+
+#CalendarControl .current {
+  border: 2px solid #3366cc;
+  background-color: #3366cc;
+  color: #fff;
+}
+
+#CalendarControl .previous,
+#CalendarControl .next {
+  font-size: 18px;
+  font-weight: bold;
+  color: #3366cc;
+  cursor: pointer;
+}
+
+#CalendarControl .title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+#CalendarControl .empty {
+  background-color: transparent;
+  border: none;
+}
